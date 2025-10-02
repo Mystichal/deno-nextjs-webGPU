@@ -1,0 +1,78 @@
+services:
+  caelum-obscurum:
+    container_name: caelum-obscurum
+    build:
+      context: ../../
+      dockerfile: .docker/development/dockerfile
+    volumes:
+      - ../../:/app
+    image: caelum-obscurum:latest
+    ports:
+      - "3333:3000"
+    networks:
+      - caelum-obscurum-network
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx-reverce-proxy
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - ../../.docker/.nginx/nginx.conf:/etc/nginx/nginx.conf
+      - certbot-etc:/etc/letsencrypt
+      - certbot-var:/var/lib/letsencrypt
+      - web-root:/var/www/html
+    depends_on:
+      - caelum-obscurum
+    networks:
+      - caelum-obscurum-network
+
+  certbot:
+    image: certbot/certbot
+    container_name: certbot
+    volumes:
+      - certbot-etc:/etc/letsencrypt
+      - certbot-var:/var/lib/letsencrypt
+      - web-root:/var/www/html
+    depends_on:
+      - nginx
+    command: certonly --webroot --webroot-path=/var/www/html --email mystichal420@gmail.com --agree-tos --no-eff-email --keep-until-expiring -d caelumobscurum.com
+
+  certbot-renewal:
+    image: certbot/certbot
+    container_name: certbot-renewal
+    volumes:
+      - certbot-etc:/etc/letsencrypt
+      - certbot-var:/var/lib/letsencrypt
+      - web-root:/var/www/html
+    depends_on:
+      - nginx
+    restart: unless-stopped
+    entrypoint: sh -c 'trap exit TERM; while :; do certbot renew --webroot --webroot-path=/var/www/html --post-hook "docker exec nginx-reverce-proxy nginx -s reload"; sleep 12h & wait $${!}; done;'
+
+  spacetimedb:
+    image: clockworklabs/spacetime:latest
+    container_name: spacetimedb
+    ports:
+      - "3338:3000"  # SpacetimeDB HTTP API
+      - "3339:3001"  # SpacetimeDB WebSocket
+    volumes:
+      - spacetimedb-data:/var/lib/spacetimedb
+    environment:
+      - RUST_LOG=info
+      - SPACETIMEDB_HOST=0.0.0.0
+    command: ["start", "--listen-addr", "0.0.0.0:3000"]
+    networks:
+      - caelum-obscurum-network
+
+networks:
+  caelum-obscurum-network:
+    driver: bridge
+
+volumes:
+  spacetimedb-data:
+    driver: local
+  certbot-etc:
+  certbot-var:
+  web-root:

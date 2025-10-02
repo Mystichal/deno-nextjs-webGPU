@@ -1,0 +1,18 @@
+{
+	"nodeModulesDir": "auto",
+	"unstable": ["unsafe-proto", "sloppy-imports"],
+	"compilerOptions": {
+		"lib": ["dom", "dom.iterable", "esnext"],
+		"strict": true,
+		"jsx": "preserve"
+	},
+	"tasks": {
+		"dev": "deno run -A --unstable-detect-cjs npm:next@latest dev",
+		"build": "deno run -A --unstable-detect-cjs npm:next@latest build",
+		"start": "deno run -A --unstable-detect-cjs npm:next@latest start",
+		"format": "npx @biomejs/biome format --write",
+		"lint": "npx @biomejs/biome lint --write",
+		"generate": "spacetime generate --lang typescript --out-dir spacetime --project-path server",
+		"publish": "cd server && spacetime publish caelum-obscurum"
+	}
+}

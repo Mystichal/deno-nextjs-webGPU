@@ -1,0 +1,38 @@
+# syntax=docker.io/docker/dockerfile:1
+
+FROM denoland/deno:latest AS base
+WORKDIR /app
+
+# 1. Install dependencies only when needed
+FROM base AS deps
+WORKDIR /app
+
+# Copy dependency files
+COPY deno.json* ./
+COPY deno.lock ./
+
+# 2. Rebuild the source code only when needed
+FROM base AS builder
+WORKDIR /app
+COPY --from=deps /deno-dir /deno-dir
+COPY . .
+
+# This will do the trick, use the corresponding env file for each environment.
+COPY .env.development .env.production
+
+# 3. Production image, copy all the files and run next
+FROM base AS runner
+WORKDIR /app
+
+ENV NODE_ENV=development
+
+# Copy cached deps
+COPY --from=deps /deno-dir /deno-dir
+
+COPY . .
+
+EXPOSE 3000
+
+ENV PORT=3000
+
+CMD ["deno", "task", "dev"]
