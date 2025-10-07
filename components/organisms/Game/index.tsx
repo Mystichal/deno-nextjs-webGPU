@@ -13,7 +13,7 @@ type CharacterState = 'idle' | 'walk' | 'run' | 'jump' | 'attack' | 'die'
 const Game = () => {
 	const [quality, setQuality] = useState<Quality>('default')
 	const [isPostProcessingEnabled, setIsPostProcessingEnabled] = useState(true)
-	const [characterState, setCharacterState] = useState<CharacterState>('jump')
+	const [characterState, setCharacterState] = useState<CharacterState>('idle')
 
 	return (
 		<>
