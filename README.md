@@ -41,7 +41,7 @@ make stop-development
 ```
 
 ```md
-    ![alt text](screenshots/overview.png)
+    ![alt text](./screenshots/overview.png)
 ```
 
 ## Credits
