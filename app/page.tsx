@@ -1,11 +1,7 @@
-import {LoadingScene} from '@/components/organisms/loadingScene'
+import Game from '@/components/organisms/Game'
 
 const Home = () => {
-	return (
-		<div>
-			<LoadingScene width={800} height={600} />
-		</div>
-	)
+	return <Game />
 }
 
 export default Home
